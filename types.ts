@@ -12,6 +12,8 @@ export enum GameState {
 
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
+export type RewardType = 'money' | 'jackpot' | 'life' | 'balls' | 'diamond' | 'bomb';
+
 export interface Cup {
   id: number;
   x: number;
@@ -20,7 +22,8 @@ export interface Cup {
   height: number;
   value: number;
   label: string;
-  type: 'money' | 'bonus' | 'life';
+  rewardType: RewardType;
+  isRevealed: boolean;
 }
 
 export interface Ball {
