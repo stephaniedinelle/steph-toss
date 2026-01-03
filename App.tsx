@@ -64,7 +64,6 @@ const App: React.FC = () => {
   const [commentary, setCommentary] = useState("Step right up! Test your skill!");
   const [toast, setToast] = useState<{ message: string, x: number, y: number, colorClass?: string } | null>(null);
   const [bgImage, setBgImage] = useState<string | null>(null);
-  const [menuHeroImage, setMenuHeroImage] = useState<string | null>(null);
   const [isGeneratingBg, setIsGeneratingBg] = useState(false);
   const [countdown, setCountdown] = useState<number | string>(3);
   const [currentPowerPercent, setCurrentPowerPercent] = useState(0);
@@ -132,31 +131,6 @@ const App: React.FC = () => {
     localStorage.setItem('steph_toss_unlocked_level', unlockedLevel.toString());
   }, [unlockedLevel]);
 
-  const generateMenuAssets = useCallback(async () => {
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const prompt = `A highly stylized, professional mobile game hero illustration. Centered, 3D vibrant red solo cup, a shiny white ping pong ball floating above it, and an open glowing mystery gift box next to it with magical sparkles and small floating question marks. Neon purple and pink background accents. No text. 1:1 aspect ratio. High quality digital art style, smooth 3D renders.`;
-      
-      const imgResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: { parts: [{ text: prompt }] },
-        config: { imageConfig: { aspectRatio: "1:1" } }
-      });
-
-      const parts = imgResponse.candidates?.[0]?.content?.parts;
-      if (parts) {
-        for (const part of parts) {
-          if (part.inlineData) {
-            setMenuHeroImage(`data:image/png;base64,${part.inlineData.data}`);
-            break;
-          }
-        }
-      }
-    } catch (error: any) {
-      console.error("Menu Art Generation Error:", error);
-    }
-  }, []);
-
   const generateBackground = useCallback(async (level: number) => {
     setIsGeneratingBg(true);
     try {
@@ -188,8 +162,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     generateBackground(currentLevel);
-    generateMenuAssets();
-  }, [currentLevel, generateBackground, generateMenuAssets]);
+  }, [currentLevel, generateBackground]);
 
   const initCups = useCallback((level: Difficulty, stage: number) => {
     const count = level === 'Easy' ? 10 : level === 'Medium' ? 7 : 5;
@@ -276,7 +249,7 @@ const App: React.FC = () => {
       c.rewardType = pool[idx].type;
       c.value = pool[idx].val;
     });
-    showToast("REWARDS MIXED!", WIDTH / 2, 120, "text-purple-500 font-bold drop-shadow-lg text-4xl uppercase");
+    showToast("REWARDS MIXED!", WIDTH / 2, 120, "text-purple-500 font-bold drop-shadow-lg text-2xl uppercase");
   }, []);
 
   const startCountdown = () => {
@@ -343,7 +316,7 @@ const App: React.FC = () => {
     if (ballsLeftRef.current === 0 && livesRef.current > 0) {
       livesRef.current -= 1; setLives(livesRef.current);
       ballsLeftRef.current += 3; setBallsLeft(ballsLeftRef.current);
-      showToast("RELOAD! +3 BALLS", WIDTH/2, HEIGHT/2, "text-red-500 font-black");
+      showToast("RELOAD! +3 BALLS", WIDTH/2, HEIGHT/2, "text-red-500 font-black text-xl");
       return true;
     }
     return false;
@@ -521,67 +494,64 @@ const App: React.FC = () => {
       
       {isGeneratingBg && (
         <div className="absolute inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-md">
-           <div className="flex flex-col items-center gap-6">
-              <div className="w-24 h-24 border-8 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-white font-black text-2xl uppercase tracking-widest animate-pulse">Entering New Realm...</span>
+           <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-white font-black text-xl uppercase tracking-widest animate-pulse">Entering New Realm...</span>
            </div>
         </div>
       )}
 
       {(gameState === GameState.AIMING || gameState === GameState.THROWN) && (
         <>
-          <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-[100] pointer-events-none">
-            <div className="flex flex-col gap-3 pointer-events-auto">
-              <div className="flex items-center bg-white/95 backdrop-blur-md border-2 border-[#E6935E] rounded-[2rem] px-6 py-4 shadow-[0_8px_0_#8B4513]">
-                <div className="w-10 h-10 bg-yellow-400 rounded-xl border-2 border-[#8B4513] flex items-center justify-center mr-4 shadow-inner">
-                  <span className="text-[#8B4513] font-black text-xl">$</span>
+          <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start z-[100] pointer-events-none">
+            <div className="flex flex-col gap-2 pointer-events-auto scale-90 origin-top-left">
+              <div className="flex items-center bg-white/95 backdrop-blur-md border border-[#E6935E] rounded-[1.5rem] px-4 py-2 shadow-[0_4px_0_#8B4513]">
+                <div className="w-8 h-8 bg-yellow-400 rounded-lg border border-[#8B4513] flex items-center justify-center mr-3 shadow-inner">
+                  <span className="text-[#8B4513] font-black text-lg">$</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[#8B4513] text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Score (Goal: ${currentGoal})</span>
-                  <span className={`font-black text-4xl tabular-nums leading-none tracking-tighter ${score >= currentGoal ? 'text-green-600' : 'text-[#8B4513]'}`}>{score}</span>
+                  <span className="text-[#8B4513] text-[8px] font-black uppercase tracking-[0.2em] opacity-50">Score (Goal: ${currentGoal})</span>
+                  <span className={`font-black text-2xl tabular-nums leading-none tracking-tighter ${score >= currentGoal ? 'text-green-600' : 'text-[#8B4513]'}`}>{score}</span>
                 </div>
               </div>
-              <div className="flex items-center bg-white/95 backdrop-blur-md border-2 border-red-400 rounded-[2rem] px-6 py-4 shadow-[0_8px_0_#991b1b]">
-                <div className="w-10 h-10 bg-red-500 rounded-xl border-2 border-white flex items-center justify-center mr-4 shadow-inner">
-                  <i className="fa-solid fa-heart text-white text-xl"></i>
+              <div className="flex items-center bg-white/95 backdrop-blur-md border border-red-400 rounded-[1.5rem] px-4 py-2 shadow-[0_4px_0_#991b1b]">
+                <div className="w-8 h-8 bg-red-500 rounded-lg border border-white flex items-center justify-center mr-3 shadow-inner">
+                  <i className="fa-solid fa-heart text-white text-lg"></i>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-red-700 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Life</span>
-                  <span className="text-red-600 font-black text-4xl tabular-nums leading-none tracking-tighter">{lives}</span>
+                  <span className="text-red-700 text-[8px] font-black uppercase tracking-[0.2em] opacity-50">Life</span>
+                  <span className="text-red-600 font-black text-2xl tabular-nums leading-none tracking-tighter">{lives}</span>
                 </div>
               </div>
-              <div className="flex items-center bg-white/95 backdrop-blur-md border-2 border-[#5EB6E6] rounded-[2rem] px-6 py-4 shadow-[0_8px_0_#2C5282]">
-                <div className="w-10 h-10 bg-cyan-400 rounded-xl border-2 border-[#2C5282] flex items-center justify-center mr-4 shadow-inner">
-                  <i className="fa-solid fa-bolt text-[#2C5282] text-2xl"></i>
+              <div className="flex items-center bg-white/95 backdrop-blur-md border border-[#5EB6E6] rounded-[1.5rem] px-4 py-2 shadow-[0_4px_0_#2C5282]">
+                <div className="w-8 h-8 bg-cyan-400 rounded-lg border border-[#2C5282] flex items-center justify-center mr-3 shadow-inner">
+                  <i className="fa-solid fa-bolt text-[#2C5282] text-xl"></i>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[#2C5282] text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Balls</span>
-                  <span className="text-[#2C5282] font-black text-4xl tabular-nums leading-none tracking-tighter">{ballsLeft}</span>
+                  <span className="text-[#2C5282] text-[8px] font-black uppercase tracking-[0.2em] opacity-50">Balls</span>
+                  <span className="text-[#2C5282] font-black text-2xl tabular-nums leading-none tracking-tighter">{ballsLeft}</span>
                 </div>
               </div>
             </div>
 
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[110] bg-white/95 backdrop-blur-md border-4 border-[#E6935E] border-dashed rounded-[3rem] px-12 py-8 w-full max-w-[520px] shadow-2xl pointer-events-auto transform rotate-[-0.5deg] transition-all duration-300">
-               <p className="text-2xl leading-snug text-[#8B4513] font-black italic tracking-tight text-center">"{commentary}"</p>
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[110] bg-white/95 backdrop-blur-md border-2 border-[#E6935E] border-dashed rounded-[2rem] px-8 py-4 w-full max-w-[400px] shadow-xl pointer-events-auto transform rotate-[-0.5deg] transition-all duration-300">
+               <p className="text-lg leading-snug text-[#8B4513] font-black italic tracking-tight text-center">"{commentary}"</p>
             </div>
 
-            <div className="flex flex-col items-end gap-3 pointer-events-auto">
-              <button onClick={() => setGameState(GameState.LEVEL_SELECT)} className="w-16 h-16 bg-[#FF6B6B] border-[4px] border-[#8B0000] rounded-[1.5rem] flex items-center justify-center shadow-[0_6px_0_#8B0000] active:translate-y-1 active:shadow-none transition-all hover:scale-110">
-                 <i className="fa-solid fa-map-marked-alt text-white text-2xl"></i>
+            <div className="flex flex-col items-end gap-2 pointer-events-auto scale-90 origin-top-right">
+              <button onClick={() => setGameState(GameState.LEVEL_SELECT)} className="w-12 h-12 bg-[#FF6B6B] border-[3px] border-[#8B0000] rounded-xl flex items-center justify-center shadow-[0_4px_0_#8B0000] active:translate-y-1 active:shadow-none transition-all hover:scale-105">
+                 <i className="fa-solid fa-map-marked-alt text-white text-xl"></i>
               </button>
             </div>
           </div>
 
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-[100] pointer-events-none">
-            <span className="text-white font-black text-xs uppercase tracking-[0.3em] bg-black/40 px-3 py-1 rounded-full border border-white/20">Power</span>
-            <div className="w-14 h-80 bg-black/40 backdrop-blur-md border-4 border-white/30 rounded-[2rem] relative overflow-hidden shadow-2xl">
-               <div className="absolute bottom-0 left-0 w-full transition-all duration-75 ease-out shadow-[0_0_30px_rgba(255,255,255,0.5)]"
-                 style={{ height: `${currentPowerPercent}%`, background: `linear-gradient(to top, #22c55e 0%, #eab308 50%, #ef4444 100%)`, boxShadow: `0 0 40px ${currentPowerPercent > 80 ? '#ef4444' : currentPowerPercent > 40 ? '#eab308' : '#22c55e'}` }} />
-               <div className="absolute inset-0 flex flex-col justify-between items-center py-6 opacity-40">
-                  <span className="text-white font-black text-[10px]">MAX</span><div className="w-full border-t-2 border-white/20"></div><div className="w-full border-t-2 border-white/20"></div><div className="w-full border-t-2 border-white/20"></div><span className="text-white font-black text-[10px]">MIN</span>
-               </div>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-[100] pointer-events-none scale-75 lg:scale-100">
+            <span className="text-white font-black text-[8px] uppercase tracking-[0.3em] bg-black/40 px-2 py-1 rounded-full border border-white/20">Power</span>
+            <div className="w-10 h-64 bg-black/40 backdrop-blur-md border-2 border-white/30 rounded-full relative overflow-hidden shadow-xl">
+               <div className="absolute bottom-0 left-0 w-full transition-all duration-75 ease-out"
+                 style={{ height: `${currentPowerPercent}%`, background: `linear-gradient(to top, #22c55e 0%, #eab308 50%, #ef4444 100%)`, boxShadow: `0 0 20px ${currentPowerPercent > 80 ? '#ef4444' : currentPowerPercent > 40 ? '#eab308' : '#22c55e'}` }} />
             </div>
-            {currentPowerPercent > 0 && <div className="animate-pulse bg-white/90 border-2 border-red-500 rounded-xl px-3 py-1 shadow-lg"><span className="text-red-600 font-black text-lg italic tracking-tighter">{Math.round(currentPowerPercent)}%</span></div>}
+            {currentPowerPercent > 0 && <div className="animate-pulse bg-white/90 border border-red-500 rounded-lg px-2 py-1 shadow-lg"><span className="text-red-600 font-black text-sm italic tracking-tighter">{Math.round(currentPowerPercent)}%</span></div>}
           </div>
         </>
       )}
@@ -590,78 +560,44 @@ const App: React.FC = () => {
         <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} className="w-full h-full object-contain block touch-none" />
 
         {gameState === GameState.MENU && (
-          <div className="absolute inset-0 z-[200] flex flex-col items-center justify-center p-4 animate-fade-in bg-black/70 backdrop-blur-[4px]">
-             {/* Slightly smaller and zoomed out card for better visibility */}
-             <div className="w-[380px] max-w-[90vw] h-[680px] max-h-[85vh] bg-white border-[12px] border-[#FF8C42] rounded-[4.5rem] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)] flex flex-col items-center justify-between p-8 relative overflow-hidden transform scale-95 lg:scale-100">
-                
-                {/* Floating mystery toss badge */}
-                <div className="mt-2 px-6 py-2 bg-[#FF6B6B] rounded-full border-2 border-white shadow-md transform rotate-[-2deg] z-20">
-                  <span className="text-white font-black text-[10px] uppercase tracking-[0.4em]">Mystery Toss</span>
+          <div className="absolute inset-0 z-[200] flex flex-col items-center justify-center p-4 animate-fade-in bg-black/40 backdrop-blur-[2px]">
+             <div className="w-full max-w-md bg-white/95 backdrop-blur-2xl border-8 border-[#FF8C42] rounded-[3rem] p-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7),0_12px_0_#8B4513] flex flex-col items-center gap-10 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
+                <div className="flex flex-col items-center gap-3 relative z-10">
+                  <div className="px-6 py-1.5 bg-[#FF6B6B] rounded-full border-2 border-white shadow-lg rotate-[-2deg]"><span className="text-white font-black text-xs uppercase tracking-[0.4em]">Mystery Toss</span></div>
+                  <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-[#FF8C42] to-[#D35400] text-center uppercase italic leading-[0.9] tracking-tighter drop-shadow-xl py-1">STEPH<br/><span className="text-[#FF6B6B]">TOSS</span></h1>
                 </div>
-
-                {/* STEPH TOSS Logo Area */}
-                <div className="flex flex-col items-center z-20">
-                  <h1 className="text-8xl font-black text-center uppercase italic leading-[0.8] tracking-tighter py-3">
-                    <span className="text-transparent bg-clip-text bg-gradient-to-b from-[#FF8C42] to-[#D35400] drop-shadow-md">STEPH</span>
-                    <br/>
-                    <span className="text-[#FF6B6B] drop-shadow-md">TOSS</span>
-                  </h1>
-                </div>
-
-                {/* Illustrative Hero Area */}
-                <div className="relative w-full flex-1 flex items-center justify-center py-4 z-10">
-                  {menuHeroImage ? (
-                    <img src={menuHeroImage} alt="Hero" className="w-full h-full object-contain animate-float drop-shadow-2xl" />
-                  ) : (
-                    <div className="w-56 h-56 bg-orange-50 rounded-full border-4 border-orange-100 animate-pulse flex items-center justify-center">
-                       <i className="fa-solid fa-gift text-orange-200 text-6xl"></i>
-                    </div>
-                  )}
-                </div>
-
-                {/* START QUEST Button at the bottom */}
-                <div className="w-full flex flex-col gap-4 items-center mb-4 z-20">
-                  <button onClick={() => setGameState(GameState.ARENA_SELECT)} 
-                          className="group relative w-full bg-[#FF6B6B] border-b-[8px] border-[#8B0000] rounded-[2.5rem] py-6 text-white font-black text-4xl uppercase shadow-xl active:translate-y-1 active:border-b-0 transition-all hover:scale-[1.03] hover:brightness-110">
-                    <span className="relative z-10">START QUEST</span>
-                  </button>
-                  
-                  {/* Progress label */}
-                  <div className="flex items-center gap-2">
-                    <span className="font-black text-[#8B4513]/40 text-[10px] uppercase tracking-widest">Adventure Stage</span>
-                    <span className="font-black text-[#FF8C42] text-xl tabular-nums leading-none">{unlockedLevel}/10</span>
+                <div className="flex flex-col w-full gap-5 relative z-10">
+                  <button onClick={() => setGameState(GameState.ARENA_SELECT)} className="group relative w-full bg-gradient-to-b from-[#FF6B6B] to-[#E63946] border-[6px] border-[#8B0000] rounded-[2rem] py-8 text-white font-black text-4xl uppercase shadow-[0_12px_0_#8B0000] active:translate-y-1 active:shadow-none transition-all hover:scale-[1.03]"><span className="relative z-10">START QUEST</span></button>
+                  <div className="w-full bg-[#FFF8F0] border-2 border-[#E6935E] rounded-[2rem] py-6 px-8 flex justify-between items-center shadow-inner">
+                    <div className="flex flex-col"><span className="font-black text-[#8B4513] text-[10px] uppercase tracking-[0.4em] opacity-40 mb-1">Stage Progress</span><span className="font-black text-[#FF8C42] text-4xl tabular-nums leading-none">{unlockedLevel} / 10</span></div>
+                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg border-2 border-yellow-50"><i className="fa-solid fa-gift text-[#FFB000] text-4xl"></i></div>
                   </div>
                 </div>
-
-                {/* Background decorative flair inside the card */}
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-orange-50/50 to-transparent pointer-events-none opacity-40"></div>
              </div>
           </div>
         )}
 
         {gameState === GameState.ARENA_SELECT && (
-          <div className="absolute inset-0 z-[200] flex flex-col items-center justify-center p-4 animate-fade-in bg-[#1a0b2e]/95 backdrop-blur-lg overflow-y-auto">
-            <button onClick={() => setGameState(GameState.MENU)} className="absolute top-6 left-6 w-14 h-14 bg-white/10 backdrop-blur-md border-2 border-purple-500 rounded-2xl flex items-center justify-center shadow-lg active:translate-y-1 active:shadow-none transition-all z-[210] hover:bg-white/20">
-              <i className="fa-solid fa-arrow-left text-purple-400 text-2xl"></i>
-            </button>
-            <div className="w-full max-w-[1000px] py-6 px-4 flex flex-col items-center scale-90 sm:scale-95 lg:scale-100 origin-center">
-               <div className="flex flex-col items-center mb-10 gap-3">
-                 <h2 className="text-6xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 uppercase italic tracking-tighter leading-none filter drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]">MODE SELECT</h2>
-                 <div className="bg-purple-900/40 border border-purple-500/30 px-8 py-2 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.1)]">
-                   <p className="text-purple-300 font-bold uppercase tracking-[0.3em] text-[10px]">FIND HIDDEN DIAMONDS & JACKPOTS!</p>
+          <div className="absolute inset-0 z-[200] flex flex-col items-center justify-center p-6 animate-fade-in bg-[#1a0b2e]/90 backdrop-blur-lg">
+            <button onClick={() => setGameState(GameState.MENU)} className="absolute top-6 left-6 w-12 h-12 bg-white/10 backdrop-blur-md border border-purple-500 rounded-xl flex items-center justify-center shadow-lg active:translate-y-1 active:shadow-none transition-all z-[210]"><i className="fa-solid fa-arrow-left text-purple-400 text-xl"></i></button>
+            <div className="w-full max-w-[1000px] flex flex-col items-center scale-90 lg:scale-100">
+               <div className="flex flex-col items-center mb-8 gap-2">
+                 <h2 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 uppercase italic tracking-tighter leading-none filter drop-shadow-lg">MODE SELECT</h2>
+                 <div className="bg-purple-900/30 border border-purple-500/30 px-8 py-2 rounded-full">
+                   <p className="text-purple-300 font-bold uppercase tracking-[0.4em] text-[8px]">FIND HIDDEN DIAMONDS & JACKPOTS!</p>
                  </div>
                </div>
                
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full px-4">
                  {[
                    { 
                      id: 'Easy', 
                      balls: 15, 
                      desc: 'Casual Toss', 
                      ballSkin: (
-                       <div className="relative w-20 h-20 bg-white rounded-full shadow-[0_0_25px_rgba(255,255,255,0.3)] flex items-center justify-center overflow-hidden border-4 border-cyan-400">
-                          <div className="absolute top-2 left-4 w-5 h-2 bg-white/40 rounded-full blur-[2px]"></div>
-                          <i className="fa-solid fa-face-smile text-cyan-500 text-4xl"></i>
+                       <div className="relative w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-cyan-400">
+                          <i className="fa-solid fa-face-smile text-cyan-500 text-3xl"></i>
                        </div>
                      )
                    },
@@ -670,10 +606,9 @@ const App: React.FC = () => {
                      balls: 10, 
                      desc: 'Fixed Pro Challenge', 
                      ballSkin: (
-                       <div className="relative w-20 h-20 bg-purple-100 rounded-full shadow-[0_0_30px_rgba(168,85,247,0.3)] flex items-center justify-center overflow-hidden border-4 border-purple-500">
-                          <div className="absolute top-1 left-3 w-6 h-3 bg-white/60 rounded-full blur-[2px]"></div>
-                          <div className="w-full h-5 bg-purple-600 absolute rotate-12 flex items-center justify-center"><span className="text-[8px] font-black text-white">PRO</span></div>
-                          <i className="fa-solid fa-bolt text-purple-800 text-4xl"></i>
+                       <div className="relative w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center overflow-hidden border-2 border-purple-500">
+                          <div className="w-full h-4 bg-purple-600 absolute rotate-12 flex items-center justify-center"><span className="text-[8px] font-black text-white">PRO</span></div>
+                          <i className="fa-solid fa-bolt text-purple-800 text-3xl"></i>
                        </div>
                      )
                    },
@@ -682,44 +617,35 @@ const App: React.FC = () => {
                      balls: 5, 
                      desc: 'Master Goal 1250+', 
                      ballSkin: (
-                       <div className="relative w-20 h-20 bg-amber-400 rounded-full shadow-[0_0_40px_rgba(245,158,11,0.5)] flex items-center justify-center overflow-hidden border-4 border-white animate-pulse">
-                          <div className="absolute inset-0 bg-gradient-to-tr from-orange-600/40 to-transparent"></div>
-                          <div className="absolute top-1 left-3 w-8 h-4 bg-white/80 rounded-full blur-[2px]"></div>
-                          <i className="fa-solid fa-crown text-white text-4xl drop-shadow-md"></i>
+                       <div className="relative w-16 h-16 bg-amber-400 rounded-full flex items-center justify-center overflow-hidden border-2 border-white">
+                          <i className="fa-solid fa-crown text-white text-3xl"></i>
                        </div>
                      )
                    }
                  ].map((lvl) => (
                    <div key={lvl.id} 
-                        className={`group relative bg-[#120626] rounded-[3rem] border-2 p-8 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-[1.03] overflow-hidden ${difficulty === lvl.id ? `border-purple-400 shadow-[0_0_30px_rgba(168,85,247,0.2)] bg-[#1e0a3d]` : 'border-purple-900/40 opacity-70'}`} 
+                        className={`group relative bg-[#120626] rounded-[2.5rem] border-2 p-8 flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-[1.03] ${difficulty === lvl.id ? `border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.3)] bg-[#1e0a3d]` : 'border-purple-900/40 opacity-80'}`} 
                         onClick={() => setDifficulty(lvl.id as Difficulty)}>
                      
-                     <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-40"></div>
+                     <div className="text-sm font-black uppercase mb-6 tracking-[0.4em] text-purple-300">{lvl.id}</div>
                      
-                     <div className={`text-base font-black uppercase mb-6 tracking-[0.3em] ${difficulty === lvl.id ? 'text-purple-200' : 'text-purple-800'}`}>{lvl.id}</div>
-                     
-                     <div className="relative w-40 h-48 flex flex-col items-center mb-6">
-                        <div className="absolute bottom-0 w-24 h-8 bg-gradient-to-b from-[#2d1252] to-[#0d041a] rounded-lg border-t border-purple-500/30"></div>
-                        <div className="relative w-32 h-36 bg-gradient-to-b from-white/10 to-transparent border-t border-x border-white/10 rounded-t-full flex items-center justify-center shadow-inner overflow-hidden">
-                           <div className="transform group-hover:scale-110 transition-transform duration-300">{lvl.ballSkin}</div>
+                     <div className="relative w-32 h-40 flex flex-col items-center mb-6">
+                        <div className="absolute bottom-0 w-24 h-6 bg-gradient-to-b from-[#2d1252] to-[#0d041a] rounded-lg border-t border-purple-500/40 shadow-xl"></div>
+                        <div className="relative w-28 h-32 bg-gradient-to-b from-white/10 to-transparent border-t border-x border-white/20 rounded-t-full flex items-center justify-center shadow-inner overflow-hidden">
+                           <div className="transform group-hover:scale-110 transition-transform duration-500">{lvl.ballSkin}</div>
                         </div>
-                        <div className="absolute top-5 right-8 w-3 h-20 bg-white/10 rounded-full blur-[3px] rotate-[-15deg]"></div>
                      </div>
 
                      <div className="flex flex-col items-center gap-1">
-                        <span className={`font-black text-3xl tabular-nums ${difficulty === lvl.id ? 'text-white' : 'text-purple-300/60'}`}>{lvl.balls} Balls</span>
-                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-purple-400/50 text-center leading-tight">{lvl.desc}</span>
+                        <span className="font-black text-2xl text-white">{lvl.balls} Balls</span>
+                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-400/50 text-center leading-tight">{lvl.desc}</span>
                      </div>
-                     
-                     {difficulty === lvl.id && (
-                       <div className="absolute bottom-3 w-1.5 h-1.5 bg-purple-400 rounded-full shadow-[0_0_10px_rgba(168,85,247,1)] animate-pulse"></div>
-                     )}
                    </div>
                  ))}
                </div>
                
                <button onClick={() => setGameState(GameState.LEVEL_SELECT)} 
-                       className="mt-12 group relative w-full max-w-[500px] bg-gradient-to-r from-purple-600 to-pink-600 border-b-[6px] border-purple-900 rounded-[2.5rem] py-8 text-white font-black text-4xl uppercase shadow-2xl active:translate-y-1 active:border-b-0 transition-all hover:brightness-110 tracking-[0.05em] overflow-hidden">
+                       className="mt-12 group relative w-full max-w-[400px] bg-gradient-to-r from-purple-600 to-pink-600 border-b-[6px] border-purple-900 rounded-[2rem] py-6 text-white font-black text-3xl uppercase shadow-xl active:translate-y-1 active:border-b-0 transition-all hover:brightness-110 tracking-widest overflow-hidden">
                   <span className="relative z-10">OPEN WORLD MAP</span>
                </button>
             </div>
@@ -727,62 +653,61 @@ const App: React.FC = () => {
         )}
 
         {gameState === GameState.LEVEL_SELECT && (
-          <div className="absolute inset-0 z-[200] flex flex-col items-center p-8 animate-fade-in bg-black/70 backdrop-blur-sm overflow-y-auto custom-scrollbar">
-            <button onClick={() => setGameState(GameState.ARENA_SELECT)} className="absolute top-10 left-10 w-20 h-20 bg-white border-4 border-[#FF8C42] rounded-[2rem] flex items-center justify-center shadow-[0_8px_0_#8B4513] active:translate-y-1 active:shadow-none transition-all z-[210]"><i className="fa-solid fa-arrow-left text-[#FF8C42] text-4xl"></i></button>
-            <div className="w-full max-w-[900px] flex flex-col items-center py-24 relative min-h-screen text-center">
-               <h2 className="text-9xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg mb-4">MAP</h2>
-               <p className="text-yellow-400 font-black uppercase tracking-[0.5em] text-sm mb-20">{difficulty} MODE ADVENTURE</p>
-               <div className="relative w-full flex flex-col items-center gap-24">
-                 <div className="absolute top-0 bottom-0 w-3 bg-gradient-to-b from-red-500 via-orange-500 to-yellow-500 rounded-full"></div>
+          <div className="absolute inset-0 z-[200] flex flex-col items-center p-6 animate-fade-in bg-black/70 backdrop-blur-sm overflow-y-auto custom-scrollbar">
+            <button onClick={() => setGameState(GameState.ARENA_SELECT)} className="absolute top-6 left-6 w-12 h-12 bg-white border-2 border-[#FF8C42] rounded-xl flex items-center justify-center shadow-lg active:translate-y-1 active:shadow-none transition-all z-[210]"><i className="fa-solid fa-arrow-left text-[#FF8C42] text-2xl"></i></button>
+            <div className="w-full max-w-[600px] flex flex-col items-center py-12 relative min-h-screen text-center">
+               <h2 className="text-7xl font-black text-white uppercase italic tracking-tighter drop-shadow-lg mb-2">MAP</h2>
+               <p className="text-yellow-400 font-black uppercase tracking-[0.5em] text-[10px] mb-12">{difficulty} MODE ADVENTURE</p>
+               <div className="relative w-full flex flex-col items-center gap-16 pb-20">
+                 <div className="absolute top-0 bottom-0 w-2 bg-gradient-to-b from-red-500 via-orange-500 to-yellow-500 rounded-full"></div>
                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
-                   const offset = Math.sin(num * 1.3) * 180;
+                   const offset = Math.sin(num * 1.3) * 120;
                    const isCompleted = num < unlockedLevel; const isLocked = num > unlockedLevel;
                    return (
-                     <div key={num} style={{ transform: `translateX(${offset}px)` }} className={`group relative z-10 w-40 h-40 rounded-[3.5rem] flex items-center justify-center transition-all duration-500 ${isLocked ? 'grayscale opacity-50 cursor-not-allowed scale-90' : 'cursor-pointer hover:scale-110'} ${num === unlockedLevel ? 'bg-yellow-400 border-[10px] border-white ring-[20px] ring-yellow-400/30 shadow-[0_0_80px_rgba(250,204,21,1)]' : isCompleted ? 'bg-[#FF6B6B] border-[8px] border-white/50 opacity-90' : 'bg-white/30 border-[8px] border-white/10'}`} onClick={() => { if (!isLocked) { setCurrentLevel(num); setGameState(GameState.INSTRUCTIONS); } else showToast("LOCKED", WIDTH/2, HEIGHT/2); }}>
-                       <span className="text-7xl font-black text-white leading-none">{isLocked ? <i className="fa-solid fa-lock text-5xl"></i> : num}</span>
-                       {isCompleted && <div className="absolute -top-5 -right-5 w-14 h-14 bg-green-500 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl"><i className="fa-solid fa-check text-white text-3xl"></i></div>}
+                     <div key={num} style={{ transform: `translateX(${offset}px)` }} className={`group relative z-10 w-24 h-24 rounded-[2rem] flex items-center justify-center transition-all duration-300 ${isLocked ? 'grayscale opacity-50 cursor-not-allowed scale-90' : 'cursor-pointer hover:scale-105'} ${num === unlockedLevel ? 'bg-yellow-400 border-[6px] border-white ring-[10px] ring-yellow-400/30 shadow-2xl' : isCompleted ? 'bg-[#FF6B6B] border-4 border-white/50 opacity-90' : 'bg-white/30 border-4 border-white/10'}`} onClick={() => { if (!isLocked) { setCurrentLevel(num); setGameState(GameState.INSTRUCTIONS); } else showToast("LOCKED", WIDTH/2, HEIGHT/2); }}>
+                       <span className="text-4xl font-black text-white leading-none">{isLocked ? <i className="fa-solid fa-lock text-2xl"></i> : num}</span>
+                       {isCompleted && <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center border-2 border-white shadow-lg"><i className="fa-solid fa-check text-white text-lg"></i></div>}
                      </div>
                    );
                  })}
-               </div><div className="h-60"></div>
+               </div>
             </div>
           </div>
         )}
 
         {gameState === GameState.INSTRUCTIONS && (
-          <div className="absolute inset-0 z-[200] flex flex-col items-center justify-center p-8 animate-fade-in bg-black/50 backdrop-blur-[2px]">
-            <button onClick={() => setGameState(GameState.LEVEL_SELECT)} className="absolute top-10 left-10 w-20 h-20 bg-white border-4 border-[#FF8C42] rounded-[2rem] flex items-center justify-center shadow-[0_8px_0_#8B4513] active:translate-y-1 active:shadow-none transition-all z-[210]"><i className="fa-solid fa-arrow-left text-[#FF8C42] text-4xl"></i></button>
-            <div className="w-full max-w-2xl bg-white/95 backdrop-blur-2xl border-[20px] border-[#FF8C42] rounded-[6rem] p-16 shadow-[0_70px_120px_-30px_rgba(0,0,0,0.8)] text-center">
-               <h2 className="text-8xl font-black text-[#FF8C42] mb-12 uppercase italic leading-none">STAGE {currentLevel}</h2>
-               <div className="bg-orange-50 border-4 border-orange-100 rounded-[3rem] p-10 mb-12 flex flex-col items-center gap-4">
-                  <span className="text-[#8B4513]/40 font-black uppercase tracking-[0.4em] text-sm">Target Earnings</span>
-                  <span className="text-8xl font-black text-[#FF6B6B] tabular-nums animate-realistic-pop-static">${currentGoal}</span>
-                  <p className="text-xs text-yellow-600 font-bold uppercase tracking-widest mt-4">Look out for hidden rewards inside cups!</p>
+          <div className="absolute inset-0 z-[200] flex flex-col items-center justify-center p-6 animate-fade-in bg-black/50 backdrop-blur-[2px]">
+            <button onClick={() => setGameState(GameState.LEVEL_SELECT)} className="absolute top-6 left-6 w-12 h-12 bg-white border-2 border-[#FF8C42] rounded-xl flex items-center justify-center shadow-lg active:translate-y-1 active:shadow-none transition-all z-[210]"><i className="fa-solid fa-arrow-left text-[#FF8C42] text-2xl"></i></button>
+            <div className="w-full max-w-sm bg-white/95 backdrop-blur-2xl border-[12px] border-[#FF8C42] rounded-[3rem] p-8 shadow-2xl text-center">
+               <h2 className="text-5xl font-black text-[#FF8C42] mb-6 uppercase italic leading-none">STAGE {currentLevel}</h2>
+               <div className="bg-orange-50 border-2 border-orange-100 rounded-[2rem] p-6 mb-8 flex flex-col items-center gap-2">
+                  <span className="text-[#8B4513]/40 font-black uppercase tracking-[0.4em] text-[8px]">Target Earnings</span>
+                  <span className="text-6xl font-black text-[#FF6B6B] tabular-nums animate-realistic-pop-static">${currentGoal}</span>
                </div>
-               <button onClick={startCountdown} className="w-full bg-[#FF6B6B] border-[10px] border-[#8B0000] rounded-[4.5rem] py-12 text-white font-black text-6xl uppercase shadow-[0_25px_0_#8B0000] active:translate-y-2 active:shadow-none transition-all hover:scale-103">LET'S TOSS</button>
+               <button onClick={startCountdown} className="w-full bg-[#FF6B6B] border-[6px] border-[#8B0000] rounded-[2rem] py-6 text-white font-black text-4xl uppercase shadow-[0_10px_0_#8B0000] active:translate-y-1 transition-all hover:scale-103">LET'S TOSS</button>
             </div>
           </div>
         )}
 
         {gameState === GameState.COUNTDOWN && (
-          <div className="absolute inset-0 z-[300] flex flex-col items-center justify-center pointer-events-none bg-black/30 backdrop-blur-[10px]">
-             <div className="text-[25rem] font-black text-white italic drop-shadow-[0_40px_0_#8B4513] animate-ping-once tracking-tighter">{countdown}</div>
+          <div className="absolute inset-0 z-[300] flex flex-col items-center justify-center pointer-events-none bg-black/30 backdrop-blur-[6px]">
+             <div className="text-[15rem] font-black text-white italic drop-shadow-[0_20px_0_#8B4513] animate-ping-once tracking-tighter">{countdown}</div>
           </div>
         )}
 
         {gameState === GameState.GAMEOVER && (
-          <div className="absolute inset-0 z-[300] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center animate-fade-in overflow-hidden">
+          <div className="absolute inset-0 z-[300] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center animate-fade-in overflow-hidden">
              {targetMet && confettiItems.map((c, i) => ( <ConfettiParticle key={i} delay={c.delay} left={c.left} color={c.color} /> ))}
-             <div className="w-full max-w-3xl bg-white border-[20px] border-[#FF8C42] rounded-[8rem] p-20 shadow-[0_100px_200px_-40px_rgba(0,0,0,1)] relative animate-scale-bounce">
-                <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-56 h-56 bg-white border-[16px] border-[#FF8C42] rounded-full flex items-center justify-center shadow-3xl z-10"><i className={`fa-solid ${targetMet ? 'fa-trophy text-[#FFB000]' : 'fa-circle-xmark text-red-500'} text-[10rem]`}></i></div>
-                <div className="flex flex-col items-center mt-20 mb-10 gap-4 relative z-10"><h2 className="text-9xl font-black text-[#FF8C42] uppercase italic leading-none">{targetMet ? 'WINNER!' : 'MISS!'}</h2><p className="font-black uppercase tracking-[0.5em] text-sm opacity-50">{targetMet ? 'GOAL SMASHED' : `NEEDED $${currentGoal}`}</p></div>
-                <div className="bg-gradient-to-b from-[#FFF7EE] to-white px-12 py-16 rounded-[6rem] border-4 border-[#E6935E] mb-16 shadow-inner flex flex-col items-center">
-                    <span className="text-[#8B4513] text-lg font-black uppercase tracking-[0.6em] opacity-40">Profit Collected</span><span className={`text-[13rem] font-black leading-none animate-grow ${targetMet ? 'text-green-500' : 'text-red-500'}`}>${score}</span>
-                    <div className="w-full h-8 bg-gray-100 rounded-full mt-8 overflow-hidden border-2 border-gray-200"><div className={`h-full transition-all duration-1000 ${targetMet ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${Math.min(100, (score/currentGoal)*100)}%` }}></div></div>
+             <div className="w-full max-w-lg bg-white border-[12px] border-[#FF8C42] rounded-[4rem] p-10 shadow-2xl relative animate-scale-bounce">
+                <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-32 h-32 bg-white border-8 border-[#FF8C42] rounded-full flex items-center justify-center shadow-xl z-10"><i className={`fa-solid ${targetMet ? 'fa-trophy text-[#FFB000]' : 'fa-circle-xmark text-red-500'} text-6xl`}></i></div>
+                <div className="flex flex-col items-center mt-12 mb-6 gap-2 relative z-10"><h2 className="text-6xl font-black text-[#FF8C42] uppercase italic leading-none">{targetMet ? 'WINNER!' : 'MISS!'}</h2><p className="font-black uppercase tracking-[0.4em] text-[10px] opacity-50">{targetMet ? 'GOAL SMASHED' : `NEEDED $${currentGoal}`}</p></div>
+                <div className="bg-gradient-to-b from-[#FFF7EE] to-white px-8 py-10 rounded-[2.5rem] border-2 border-[#E6935E] mb-8 shadow-inner flex flex-col items-center">
+                    <span className="text-[#8B4513] text-sm font-black uppercase tracking-[0.4em] opacity-40">Profit Collected</span><span className={`text-8xl font-black leading-none animate-grow ${targetMet ? 'text-green-500' : 'text-red-500'}`}>${score}</span>
+                    <div className="w-full h-4 bg-gray-100 rounded-full mt-6 overflow-hidden border border-gray-200"><div className={`h-full transition-all duration-1000 ${targetMet ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${Math.min(100, (score/currentGoal)*100)}%` }}></div></div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-8 relative z-10 w-full">
-                  <button onClick={() => setGameState(GameState.LEVEL_SELECT)} className="group flex-1 bg-white border-4 border-[#E6935E] rounded-[4rem] py-8 text-[#8B4513] font-black text-2xl uppercase shadow-[0_12px_0_#DDD] active:translate-y-2 active:shadow-none transition-all">WORLD MAP</button>
-                  <button onClick={() => { if (targetMet) { if (currentLevel < 10) { setCurrentLevel(currentLevel + 1); setGameState(GameState.LEVEL_SELECT); } else { setGameState(GameState.MENU); } } else { startCountdown(); } }} className={`group flex-[1.7] border-[10px] rounded-[4rem] py-8 text-white font-black text-4xl uppercase active:translate-y-2 active:shadow-none transition-all ${targetMet ? 'bg-gradient-to-b from-[#22c55e] to-[#16a34a] border-[#14532d] shadow-[0_20px_0_#14532d]' : 'bg-gradient-to-b from-[#FF6B6B] to-[#E63946] border-[#8B0000] shadow-[0_20px_0_#8B0000]'}`}>{targetMet ? (currentLevel < 10 ? 'NEXT LEVEL' : 'FINISHED') : 'RETRY STAGE'}</button>
+                <div className="flex flex-col md:flex-row gap-4 relative z-10 w-full">
+                  <button onClick={() => setGameState(GameState.LEVEL_SELECT)} className="group flex-1 bg-white border-2 border-[#E6935E] rounded-[1.5rem] py-4 text-[#8B4513] font-black text-lg uppercase shadow-lg active:translate-y-1 transition-all">MAP</button>
+                  <button onClick={() => { if (targetMet) { if (currentLevel < 10) { setCurrentLevel(currentLevel + 1); setGameState(GameState.LEVEL_SELECT); } else { setGameState(GameState.MENU); } } else { startCountdown(); } }} className={`group flex-[1.5] border-[6px] rounded-[1.5rem] py-4 text-white font-black text-2xl uppercase shadow-lg active:translate-y-1 transition-all ${targetMet ? 'bg-gradient-to-b from-[#22c55e] to-[#16a34a] border-[#14532d]' : 'bg-gradient-to-b from-[#FF6B6B] to-[#E63946] border-[#8B0000]'}`}>{targetMet ? (currentLevel < 10 ? 'NEXT LEVEL' : 'FINISHED') : 'RETRY STAGE'}</button>
                 </div>
              </div>
           </div>
@@ -790,7 +715,7 @@ const App: React.FC = () => {
 
         {toast && (
           <div style={{ left: (toast.x / WIDTH) * 100 + '%', top: (toast.y / HEIGHT) * 100 + '%' }} className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 animate-realistic-pop z-[200]">
-            <span className={`text-[12rem] font-black italic drop-shadow-[0_20px_0_black] leading-none ${toast.colorClass || 'text-yellow-400'}`}>
+            <span className={`text-7xl font-black italic drop-shadow-[0_8px_0_black] leading-none ${toast.colorClass || 'text-yellow-400'}`}>
               {toast.message}
             </span>
           </div>
@@ -801,12 +726,10 @@ const App: React.FC = () => {
         @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(800px) rotate(720deg); opacity: 0; } }
         @keyframes scale-bounce { 0% { transform: scale(0.7); opacity: 0; } 65% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
         @keyframes grow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes realistic-pop { 0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; } 25% { transform: translate(-50%, -70px) scale(1.3); opacity: 1; } 100% { transform: translate(-50%, -400px) scale(2.0); opacity: 0; } }
+        @keyframes realistic-pop { 0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; } 25% { transform: translate(-50%, -40px) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -300px) scale(1.4); opacity: 0; } }
         @keyframes realistic-pop-static { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes fade-in { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes ping-once { 0% { transform: scale(0.1); opacity: 0; } 45% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        .animate-float { animation: float 4s ease-in-out infinite; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes ping-once { 0% { transform: scale(0.1); opacity: 0; } 45% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
         .animate-confetti-fall { animation: confetti-fall 4.5s linear infinite; }
         .animate-scale-bounce { animation: scale-bounce 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
         .animate-grow { animation: grow 2s infinite ease-in-out; }
@@ -814,8 +737,8 @@ const App: React.FC = () => {
         .animate-realistic-pop { animation: realistic-pop 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
         .animate-realistic-pop-static { animation: realistic-pop-static 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
         .animate-ping-once { animation: ping-once 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-        .custom-scrollbar::-webkit-scrollbar { width: 12px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF8C42; border-radius: 20px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF8C42; border-radius: 10px; }
       `}</style>
     </div>
   );
