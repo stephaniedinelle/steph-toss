@@ -85,6 +85,7 @@ const App: React.FC = () => {
   const requestRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
   const audioRef = useRef<HTMLAudioElement>(null);
+  const audioStartedRef = useRef(false);
 
   // --- CONSTANTS ---
   const WIDTH = 800;
@@ -277,10 +278,13 @@ const App: React.FC = () => {
     setGameState(GameState.AIMING);
     setCommentary(`Goal: $${currentGoal}!`);
     startTimeRef.current = Date.now();
-    audioRef.current?.play().catch(e => console.log('Audio play failed:', e));
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (!audioStartedRef.current) {
+      audioRef.current?.play().catch(e => console.log('Audio play failed:', e));
+      audioStartedRef.current = true;
+    }
     if (gameState !== GameState.AIMING) return;
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
