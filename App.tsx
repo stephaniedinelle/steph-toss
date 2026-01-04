@@ -259,6 +259,10 @@ const App: React.FC = () => {
   }, []);
 
   const startCountdown = () => {
+    if (!audioStartedRef.current) {
+      audioRef.current?.play().catch(e => console.log('Audio play failed:', e));
+      audioStartedRef.current = true;
+    }
     setStats({ hits: 0, jackpots: 0, totalTossed: 0 });
     setScore(0); scoreRef.current = 0;
     setLives(3); livesRef.current = 3;
@@ -281,10 +285,6 @@ const App: React.FC = () => {
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (!audioStartedRef.current) {
-      audioRef.current?.play().catch(e => console.log('Audio play failed:', e));
-      audioStartedRef.current = true;
-    }
     if (gameState !== GameState.AIMING) return;
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
