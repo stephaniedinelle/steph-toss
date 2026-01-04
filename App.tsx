@@ -495,17 +495,23 @@ const App: React.FC = () => {
   return (
     <style>{`
       .animated-bg {
-        animation: gradientShift 10s ease infinite;
+        animation: gradientShift 8s ease infinite, colorPulse 4s ease-in-out infinite alternate;
         background-size: 400% 400%;
       }
       @keyframes gradientShift {
         0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
+        25% { background-position: 100% 50%; }
+        50% { background-position: 100% 0%; }
+        75% { background-position: 0% 0%; }
         100% { background-position: 0% 50%; }
+      }
+      @keyframes colorPulse {
+        0% { filter: hue-rotate(0deg) saturate(1); }
+        100% { filter: hue-rotate(360deg) saturate(1.5); }
       }
     `}</style>
     <div className="fixed inset-0 flex flex-col items-stretch justify-stretch font-sans select-none overflow-hidden animated-bg"
-      style={{ backgroundImage: bgImage ? `url(${bgImage})` : 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #ff6b6b)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#000' }}>
+      style={{ backgroundImage: bgImage ? `url(${bgImage})` : 'linear-gradient(45deg, #8b5cf6, #06b6d4, #ec4899, #10b981, #f59e0b, #ef4444, #8b5cf6)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#000' }}>
       
       {isGeneratingBg && (
         <div className="absolute inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-md">
