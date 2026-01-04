@@ -493,8 +493,19 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex flex-col items-stretch justify-stretch font-sans select-none overflow-hidden"
-      style={{ backgroundImage: bgImage ? `url(${bgImage})` : 'linear-gradient(to bottom, #1a1a2e, #16213e)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#000' }}>
+    <style>{`
+      .animated-bg {
+        animation: gradientShift 10s ease infinite;
+        background-size: 400% 400%;
+      }
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+    `}</style>
+    <div className="fixed inset-0 flex flex-col items-stretch justify-stretch font-sans select-none overflow-hidden animated-bg"
+      style={{ backgroundImage: bgImage ? `url(${bgImage})` : 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b, #ff6b6b)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#000' }}>
       
       {isGeneratingBg && (
         <div className="absolute inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-md">
