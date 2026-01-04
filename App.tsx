@@ -134,6 +134,11 @@ const App: React.FC = () => {
   const generateBackground = useCallback(async (level: number) => {
     setIsGeneratingBg(true);
     try {
+      if (!process.env.API_KEY) {
+        console.warn('GEMINI_API_KEY not set; skipping background generation.');
+        setIsGeneratingBg(false);
+        return;
+      }
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const theme = THEMES[(level - 1) % THEMES.length];
       const prompt = `A beautiful, vibrant, professional 2D game background for a mobile game. Theme: ${theme}. Clean perspective, high-quality digital art, vibrant colors, no text, no characters. Cinematic lighting.`;
@@ -490,7 +495,7 @@ const App: React.FC = () => {
 
   return (
     <div className="fixed inset-0 flex flex-col items-stretch justify-stretch font-sans select-none overflow-hidden"
-      style={{ backgroundImage: bgImage ? `url(${bgImage})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#000' }}>
+      style={{ backgroundImage: bgImage ? `url(${bgImage})` : `url(/default-bg.svg)`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#000' }}>
       
       {isGeneratingBg && (
         <div className="absolute inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-md">
