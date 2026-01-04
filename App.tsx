@@ -744,7 +744,7 @@ const App: React.FC = () => {
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF8C42; border-radius: 10px; }
       `}</style>
-      <audio src="/love.mp3" autoPlay loop />
+      <audio src="/love.mp3" controls loop />
     </div>
   );
 };
