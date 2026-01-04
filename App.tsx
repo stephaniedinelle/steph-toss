@@ -277,7 +277,7 @@ const App: React.FC = () => {
     setGameState(GameState.AIMING);
     setCommentary(`Goal: $${currentGoal}!`);
     startTimeRef.current = Date.now();
-    audioRef.current?.play();
+    audioRef.current?.play().catch(e => console.log('Audio play failed:', e));
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -746,7 +746,7 @@ const App: React.FC = () => {
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF8C42; border-radius: 10px; }
       `}</style>
-      <audio ref={audioRef} src="/love.mp3" loop />
+      <audio ref={audioRef} src="/love.mp3" loop preload="auto" />
     </div>
   );
 };
