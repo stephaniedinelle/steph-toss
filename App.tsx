@@ -750,7 +750,7 @@ const App: React.FC = () => {
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF8C42; border-radius: 10px; }
       `}</style>
-      <audio ref={audioRef} src="/love.mp3" loop preload="auto" />
+      <audio ref={audioRef} src="/love.mp3" loop preload="auto" onCanPlay={() => console.log('Audio can play')} onError={(e) => console.log('Audio error:', e)} />
     </div>
   );
 };
