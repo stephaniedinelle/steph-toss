@@ -84,6 +84,7 @@ const App: React.FC = () => {
   const dragCurrentRef = useRef<Vector2D | null>(null);
   const requestRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // --- CONSTANTS ---
   const WIDTH = 800;
@@ -276,6 +277,7 @@ const App: React.FC = () => {
     setGameState(GameState.AIMING);
     setCommentary(`Goal: $${currentGoal}!`);
     startTimeRef.current = Date.now();
+    audioRef.current?.play();
   };
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -744,7 +746,7 @@ const App: React.FC = () => {
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FF8C42; border-radius: 10px; }
       `}</style>
-      <audio src="/love.mp3" controls loop />
+      <audio ref={audioRef} src="/love.mp3" loop />
     </div>
   );
 };
